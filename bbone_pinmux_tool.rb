@@ -1220,7 +1220,6 @@ def find_by_pin_function(function,context)
   return pins
 end
 
-
 opts=GetoptLong.new(
 ['--verbose','-v',GetoptLong::OPTIONAL_ARGUMENT],
 ['--input-format',GetoptLong::REQUIRED_ARGUMENT],
@@ -1258,7 +1257,7 @@ opts.each do |opt,arg|
   end
 end
 
-current_context=Marshal.load(Marshal.dump(default_context.clone))
+current_context=Marshal.load(Marshal.dump(default_context))
 
 
 if(!list_name.nil?)
@@ -1323,61 +1322,3 @@ else
 end
   
   
-exit
-
-
-
-inf="doc/input file format.txt"
-inf="tmp/in.txt"
-current_context=Marshal.load(Marshal.dump(default_context.clone))
-
-#puts current_context[:header][:name]
-#puts current_context[:header][:version]
-#puts current_context[:header][:manufacturer]
-#puts current_context[:header][:part_nb]
-#puts current_context[:header][:serial_nb]
-
-read_text_file(inf,current_context)
-eeprom=build_binary(current_context)
-#eeprom_f=File.open("eeprom.bin","wb"){|file| eeprom.write(file) }
-eeprom_f=File.open("tmp/eeprom.bin","wb")
-#puts eeprom.length
-#puts eeprom.class
-#puts eeprom[10].class
-(0..(eeprom.length-1)).each{|i|  eeprom_f.putc eeprom[i]}
-#puts
-#eeprom_f.write(eeprom)
-eeprom_f.close
-
-current_context=Marshal.load(Marshal.dump(default_context.clone))
-
-
-parse_binary(eeprom,current_context)
-save_text_file('template/desc.txt.tmpl','tmp/out.txt',current_context)
-
-puts "-------------\nBy function:"
-x=find_by_pin_function('spi.*',current_context)
-x.keys.sort.each do |n|
-  printf("%s: ",n)
-  x[n].each {|pi| printf("%s(%s) ",pi[:name][0],pi[:name][1])}
-  printf("\n")
-end
-
-puts "-------------\nBy name:"
-x=find_by_pin_name('spi.*',current_context)
-x.keys.sort.each do |n|
-  printf("%s: ",n)
-  x[n].each {|pi| printf("%s(%s) ",pi[:name][0],pi[:name][1])}
-  printf("\n")
-end
-
-#puts current_context[:header][:name]
-#puts current_context[:header][:version]
-#puts current_context[:header][:manufacturer]
-#puts current_context[:header][:part_nb]
-#puts current_context[:header][:serial_nb]
-
-#puts get_mux_name(current_context[:pin_info][0][:mux_mode],current_context[:pin_info][0])
-
-
-
