@@ -1,0 +1,71 @@
+[header]
+	name Test board
+	version 123
+	manufacturer Jacek Radzikowsk
+	part FlyingBone
+	serial 11224P160001
+
+[current]
+	3.3vdd 123mA
+	5vdd 500mA
+	5sys 2000mA
+	supplied 1234mA
+
+[pin p9-22]
+	bidir
+	slow
+	rx
+	pull up
+	pull disable
+	mux 7
+[pin p9-21]
+	out
+	slow
+	rx
+	pull up
+	pull disable
+	mux 6
+[pin p9-18]
+	in
+	slow
+	rx
+	pull up
+	pull disable
+	mux 7
+	
+	
+[pin p9-17]
+	in
+	fast
+	rx
+	pull up
+	pull disable
+	mux 3
+[pin p9-42]
+	in
+	fast
+	pull up
+	pull disable
+	mux 3
+[pin p8-35]
+	in
+	fast
+	pull up
+	pull disable
+	mux 2
+[pin p8-33]
+	in
+	fast
+	pull down
+	pull disable
+	mux 1
+[pin p8-31]
+	in
+	fast
+	pull down
+	pull enable
+	mux 0
+	
+	
+	
+	
