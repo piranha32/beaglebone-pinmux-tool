@@ -1,0 +1,81 @@
+#comment
+
+bogus line
+anotehr bogus line
+
+[general]
+#general information
+
+#header
+#'name' defines board's name. Max length 32 characters, will be space padded on the left 
+name Test board
+
+#'version' Hardware version of board in ASCII. Max 4 characters, will be zero-padded on the left. 
+version 123
+
+#'manufacturer' Name of the board's manufacturer. max 16 ASCII characters, will be space padded on the left.
+manufacturer Jacek Radzikowski
+
+#'part' Part number. Max 16 ASCII characters, will be space padded on the left
+part FlyingBone
+ 
+#'serial' serial number of the board. Max 12 ASCII characters.
+Serial  11224P160001
+
+#max. current drawn or supplied by the cape. values: 0-65535mA. Can be expressed as miliamps or amps
+[current]
+#current drawn from 3.3V EXT, 5V VDD and 5V SYS pins.
+3.3vdd 123mA
+5vdd .5A
+5sys 2A
+#Max current supplied, if the board supplies current to VDD-5V rail. values: 0-65535mA, 0 means no current supplied.   
+supplied 1.234A
+
+#up to 32543 bytes of user data that will be stored after the cape descriptor. Multiple sections will be merged in the order as they appear in the config file
+#Content from file
+[user data]
+file /path/to/file/with/content
+
+#content encoded as hex numbers
+[user data hex]
+deadbeef
+ 
+
+#pin configurations
+#'pin' starts description of a pin's configuration. Pin names are puilt using connector name and pin number. Names are case-insensitive
+[pin p9-22]
+	in		#Pin direction. Possible values: in, out, bidir
+	fast	#slew rate. Possible values: slow, fast
+	rx		#RX enables. Possible values: rx, -(blank)
+	pull up	#pull mode. Possible values: pu for pull-up, pd, for pull-down, blank for none
+	pull enable		#pull enable. Possible values: pen, -(blank)
+	mux 7	#mux mode. Possible values: 0..7 or function name (pin-dependent)
+[pin uart2_txd]
+	out		#Pin direction. Possible values: in, out, bidir
+	fast	#slew rate. Possible values: slow, fast
+	rx		#RX enables. Possible values: rx, -(blank)
+	pull up		#pull mode. Possible values: pu for pull-up, pd, for pull-down, blank for none
+	pull enable		#pull enable. Possible values: pen, -(blank)
+	mux uart2_txd	#mux mode. Possible values: 0..7 or function name (pin-dependent)
+		
+[pin p8-19]
+	out
+	slow
+	mux 0
+[pin p8-23]
+	out
+	fast
+	mux 5
+[pin dupa]
+	out
+[pin gpio1_5]
+	out
+	fast
+	mux 3
+	
+	
+[pin ...]
+
+[dupa]
+
+ 

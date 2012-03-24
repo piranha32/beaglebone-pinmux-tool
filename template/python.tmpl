@@ -1,0 +1,26 @@
+#!/usr/bin/python
+#Author: <%=context[:header][:manufacturer].join.sub(/^\s*/,'')%>
+#Cape name: <%=context[:header][:name].join.sub(/^\s*/,'')%>
+#Cape version: <%=context[:header][:version].join.sub(/^\s*/,'')%>
+
+#Code based on https://groups.google.com/d/msg/beagleboard/fz72c2K_2nE/D7_83wK69r8J
+import os
+import logging
+
+uart1_pin_mux = [<%context[:pin_info].each do |pi| if (pi[:used]>0)
+mux=0
+mux|=0x40 if pi[:slew_rate]>0
+mux|=0x20 if pi[:rx]>0 || pi[:dir]==1
+mux|=0x10 if pi[:pull]>0
+mux|=0x08 if pi[:pen] ==0
+mux|=pi[:mux_mode] & 0x7
+%>
+                  ('<%=pi[:modes].find{|m| m[1]==0}[0]%>',<%=mux%>),<%end;end%>
+                ]
+
+logging.basicConfig(level=logging.DEBUG)
+
+for (fname, mode) in uart1_pin_mux:
+        logging.debug("%s = %s" % (fname, mode))
+        with open(os.path.join('/sys/kernel/debug/omap_mux', fname), 'wb') as f:
+                f.write("%X" % mode) 

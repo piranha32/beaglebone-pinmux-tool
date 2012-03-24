@@ -1,0 +1,16 @@
+#!/bin/sh
+#Author: <%=context[:header][:manufacturer].join.sub(/^\s*/,'')%>
+#Cape name: <%=context[:header][:name].join.sub(/^\s*/,'')%>
+#Cape version: <%=context[:header][:version].join.sub(/^\s*/,'')%>
+
+<%context[:pin_info].each do |pi| if (pi[:used]>0)
+mux=0
+mux|=0x40 if pi[:slew_rate]>0
+mux|=0x20 if pi[:rx]>0 || pi[:dir]==1
+mux|=0x10 if pi[:pull]>0
+mux|=0x08 if pi[:pen] ==0
+mux|=pi[:mux_mode] & 0x7
+%>
+echo <%=mux%> > /sys/kernel/debug/omap_mux/<%=pi[:modes].find{|m| m[1]==0}[0]%>
+<%end;end%>
+

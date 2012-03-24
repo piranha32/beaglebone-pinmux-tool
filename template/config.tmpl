@@ -1,0 +1,22 @@
+[header]
+	name <%=context[:header][:name].join.sub(/^\s*/,'')%>
+	version <%=context[:header][:version].join.sub(/^\s*/,'')%>
+	manufacturer <%=context[:header][:manufacturer].join.sub(/^\s*/,'')%>
+	part <%=context[:header][:part_nb].join.sub(/^\s*/,'')%>
+	serial <%=context[:header][:serial_nb].join.sub(/^\s*/,'')%>
+
+[current]
+	3.3vdd <%=context[:current][:vdd_3v3]%>mA
+	5vdd <%=context[:current][:vdd_5v]%>mA
+	5sys <%=context[:current][:sys_5v]%>mA
+	supplied <%=context[:current][:supplied]%>mA
+
+<%context[:pin_info].each do |pi| if (pi[:used]>0)%>
+[pin <%=pi[:name][0]%>]
+	<%=["","in","out","bidir"][pi[:dir]]%>
+	<%=["fast","slow"][pi[:slew_rate]]%><%if(pi[:rx]>0)%>
+	<%="rx"%><%end%>
+	pull <%=(pi[:pull]>0)?"up":"down"%>
+	pull <%=(pi[:pen]>0)?"enable":"disable"%>
+	mux <%=get_mux_name(pi[:mux_mode],pi)%>
+<%end;end%>
