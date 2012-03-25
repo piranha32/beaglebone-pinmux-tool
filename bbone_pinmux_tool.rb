@@ -8,7 +8,6 @@ begin
 rescue Exception=>e 
   puts "*** WARNING *** Erubis not found. Saving in non-binary formats disabled."
 end
-#puts has_erubis
 
 
 default_context=
@@ -1259,7 +1258,6 @@ end
 
 current_context=Marshal.load(Marshal.dump(default_context))
 
-
 if(!list_name.nil?)
   x=find_by_pin_name(list_name,current_context)
   x.keys.sort.each do |n|
@@ -1321,8 +1319,11 @@ if(output_format=='binary')
   eeprom_f.close
   exit
 else
-  
-  save_text_file("#{aswd}/template/#{output_format}.tmpl",output_file_name,current_context)
+  if(has_erubis)
+    save_text_file("#{aswd}/template/#{output_format}.tmpl",output_file_name,current_context)
+  else
+    puts "*** ERROR *** Saving text files not supported.\nPlease run 'gem install erubis' to install Erubis gem."
+  end
 end
   
   
