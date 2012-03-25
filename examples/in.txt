@@ -1,7 +1,7 @@
 [header]
 	name Test board
 	version 123
-	manufacturer Jacek Radzikowsk
+	manufacturer John Smith
 	part FlyingBone
 	serial 11224P160001
 
