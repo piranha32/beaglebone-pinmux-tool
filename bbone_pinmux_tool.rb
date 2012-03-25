@@ -1287,9 +1287,6 @@ case input_format
     begin
       eeprom_f=File.new(input_file_name,"rb")
       eeprom=eeprom_f.read
-      #while(!(b=eeprom_f.getc).nil?)
-      #  eeprom.push(b)
-      #end
       eeprom_f.close
     rescue Exception => e
       puts "Can't read input file \"#{input_file_name}\": #{e.to_s}."

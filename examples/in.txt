@@ -1,6 +1,8 @@
+#An example of a configuration file
+
 [header]
-	name Test board
-	version 123
+	name Test board   #This is a comment
+	version 123       #All comments are stripped during parsing
 	manufacturer John Smith
 	part FlyingBone
 	serial 11224P160001

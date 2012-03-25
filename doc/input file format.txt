@@ -1,8 +1,5 @@
 #comment
 
-bogus line
-anotehr bogus line
-
 [general]
 #general information
 
@@ -14,7 +11,7 @@ name Test board
 version 123
 
 #'manufacturer' Name of the board's manufacturer. max 16 ASCII characters, will be space padded on the left.
-manufacturer Jacek Radzikowski
+manufacturer John Smith
 
 #'part' Part number. Max 16 ASCII characters, will be space padded on the left
 part FlyingBone
@@ -66,16 +63,8 @@ deadbeef
 	out
 	fast
 	mux 5
-[pin dupa]
-	out
 [pin gpio1_5]
 	out
 	fast
 	mux 3
 	
-	
-[pin ...]
-
-[dupa]
-
- 

@@ -1,0 +1,4 @@
+The Beaglebone Pinmux Tool
+
+The tool helps to generate pin muxing configration for BeagleBone board. 
+Full documentation can be found in "doc/Pinmux Tool.pdf"
