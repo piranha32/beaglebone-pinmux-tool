@@ -66,6 +66,12 @@
 	pull enable
 	mux 0
 	
-	
+[pin p8-32]
+	out
+	fast
+	pull down
+	pull enable
+	mux 0
+
 	
 	

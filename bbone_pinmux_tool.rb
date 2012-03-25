@@ -1300,6 +1300,9 @@ case input_format
     parse_binary(eeprom,current_context)
 end
 
+swd=File.dirname(__FILE__)
+aswd=File.expand_path(swd)
+
 eeprom_f=STDOUT
 if(output_format=='binary')
   eeprom=build_binary(current_context)
@@ -1318,7 +1321,8 @@ if(output_format=='binary')
   eeprom_f.close
   exit
 else
-  save_text_file("template/#{output_format}.tmpl",output_file_name,current_context)
+  
+  save_text_file("#{aswd}/template/#{output_format}.tmpl",output_file_name,current_context)
 end
   
   
