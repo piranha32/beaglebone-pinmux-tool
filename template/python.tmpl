@@ -7,15 +7,29 @@
 import os
 import logging
 
+DDR_IN  = (1 << 5)
+DDR_OUT = (0 << 5)
+SLEW_SLOW = (1 << 6)
+PULL_R_UP       = (1 << 4)
+PULL_R_DOWN     = (0 << 4)
+PULL_R_EN       = (0 << 3)
+PULL_R_DIS      = (1 << 3)
+
 uart1_pin_mux = [<%context[:pin_info].each do |pi| if (pi[:used]>0)
-mux=0
-mux|=0x40 if pi[:slew_rate]>0
-mux|=0x20 if pi[:rx]>0 || pi[:dir]==1
-mux|=0x10 if pi[:pull]>0
-mux|=0x08 if pi[:pen] ==0
-mux|=pi[:mux_mode] & 0x7
+#mux=0
+#mux|=0x40 if pi[:slew_rate]>0
+#mux|=0x20 if pi[:rx]>0 || pi[:dir]==1
+#mux|=0x10 if pi[:pull]>0
+#mux|=0x08 if pi[:pen] ==0
+#mux|=pi[:mux_mode] & 0x7
+
+mux_str=(pi[:mux_mode] & 0x7).to_s
+mux_str+=" | SLEW_SLOW" if pi[:slew_rate]>0
+mux_str+=" | DDR_IN"  if pi[:rx]>0 || pi[:dir]==1
+mux_str+=" | PULL_R_UP" if pi[:pull]>0
+mux_str+=" | PULL_R_DIS" if pi[:pen] ==0
 %>
-                  ('<%=pi[:modes].find{|m| m[1]==0}[0]%>',<%=mux%>),<%end;end%>
+                  ('<%=pi[:modes].find{|m| m[1]==0}[0]%>',<%=mux_str%>),<%end;end%>
                 ]
 
 logging.basicConfig(level=logging.DEBUG)

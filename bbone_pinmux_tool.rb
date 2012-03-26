@@ -9,7 +9,6 @@ rescue Exception=>e
   puts "*** WARNING *** Erubis not found. Saving in non-binary formats disabled."
 end
 
-
 default_context=
 {
   :line_nb=>0,
@@ -792,7 +791,6 @@ def find_pin(context)
     break
     end
   end
-
   return context[:pin]
 end
 
@@ -804,15 +802,12 @@ def rjustn(str,n)
 end
 
 def process_header(context)
-  #puts "header line: #{context[:line]}"
   if((context[:line]=~/^(\S+)(\s+(\S.*))?$/).nil?)
     puts "*** WARNING *** Can't parse line \"#{context[:line].downcase}\""
     return
   end
   cmd=$1.downcase
   arg=$3
-  #puts "Command: \"#{cmd}\""
-  #puts "  Arg: \"#{arg}\"" if !arg.nil?
   
   arglen=arg.length
   if(cmd=="name")
@@ -830,15 +825,12 @@ def process_header(context)
 end
 
 def process_current(context)
-  #puts "current line: #{context[:line]}"
   if((context[:line]=~/^(\S+)(\s+(\S.*))?$/).nil?)
     puts "*** WARNING *** Can't parse line \"#{context[:line].downcase}\". Ignored."
     return
   end
   cmd=$1.downcase
   arg=$3.downcase
-  #puts "Command: \"#{cmd}\""
-  #puts "  Arg: \"#{arg}\"" if !arg.nil?
   
   current=0
   if(arg=~/^(\d+)ma$/)
@@ -849,7 +841,6 @@ def process_current(context)
     puts "*** WARNING *** Can't parse current value \"#{arg}\" in line #{context[:line_nb]}. Ignored."
     return
   end
-  #puts "Current: #{current}mA"
   if(current<0 || current > 0xffff)
     puts "*** WARNING *** Current value out of range in line #{context[:line_nb]}. Ignored."
     return
@@ -909,7 +900,6 @@ def get_mux_name(arg,pin_info)
 end
 
 def process_pin(context)
-  #puts "pin \"#{context[:arg]}\" line: #{context[:line]}"
   pin_name=context[:arg].downcase
   pin_info=context[:pin]
 
@@ -924,13 +914,19 @@ def process_pin(context)
   end
   cmd=$1
   arg=$3
-  #puts "Command: #{cmd}"
-  #puts "  Arg: #{arg}" if !arg.nil?
 
+  #Structure of the pad control register is described in table 9.1 of spruh73
   if(cmd=="in" || cmd=="out" || cmd=="bidir" || cmd=="bdir")
-    pin_info[:dir]=1 if(cmd=="in")
-    pin_info[:dir]=2 if(cmd=="out")
-    pin_info[:dir]=3 if(cmd=="bidir" || cmd=="bdir")
+    if(cmd=="in")
+      pin_info[:dir]=1
+      pin_info[:rx]=1
+    elsif(cmd=="out")
+      pin_info[:dir]=2 
+      pin_info[:rx]=0
+    elsif(cmd=="bidir" || cmd=="bdir")
+      pin_info[:dir]=3
+      pin_info[:rx]=1
+    end
   elsif(cmd=="fast" || cmd=="slow")
     pin_info[:slew_rate]=0 if cmd=="fast"
     pin_info[:slew_rate]=1 if cmd=="slow"
@@ -954,7 +950,6 @@ def process_pin(context)
       puts "*** WARNING *** Mode \"#{arg}\" not valid for pin \"#{context[:arg]}\" in line #{context[:line_nb]}. Ignored."
       return
     end
-    #puts "pin mode #{mode}"
     pin_info[:mux_mode]=mode
   else
     puts "*** WARNING *** Unknown pin config command #{cmd}. Ignored."
@@ -981,24 +976,28 @@ def read_text_file(input_file,context)
     context[:line_nb]+=1
     l.chomp!
     l.sub!(/#.*$/,'')
-    #  l.sub!(/^[\s]*(\S?.*\S?)[\s]*$/,'\1')
     l.sub!(/^\s*/,'')
     l.sub!(/\s*$/,'')
-    #l.sub!(/^\s*(\S.*\S)?\s*$/,'\1')
     next if l.empty?
-    #puts "l: \"#{l}\""
 
     if(l=~/^\[(.*)\]/)
       #section name
       $1.downcase.sub(/^\s*(\S.*\S)\s*$/,'\1')=~/^(\S+)(\s+(\S.*))?$/
       context[:section]=$1
       context[:arg]=$3
-      #puts("section #{context[:section]} in line #{context[:line_nb]}")
 
       if(context[:section]!="pin" && context[:section]!="header" && context[:section] != "user" && context[:section] !="current")
         puts("*** WARNING *** Unknown section \"#{context[:section]}\" in line #{context[:line_nb]}. Skipping.")
         context[:section]="skip"
-      next
+        next
+      end
+
+      if(context[:section]=='header')
+        context[:header][:name]=rjustn("",32) if context[:header][:name].nil?
+        context[:header][:version]=rjustn("",4) if context[:header][:version].nil?
+        context[:header][:manufacturer]=rjustn("",16) if context[:header][:manufacturer].nil?
+        context[:header][:part_nb]=rjustn("",14) if context[:header][:part_nb].nil?
+        context[:header][:serial_nb]=rjustn("",12) if context[:header][:serial_nb].nil?
       end
 
       if(context[:section]=='pin')
@@ -1011,12 +1010,10 @@ def read_text_file(input_file,context)
         if(!pi[:defined].nil?)
           puts("*** WARNING *** Pin \"#{context[:arg]}\" redefined in line #{context[:line_nb]}. Previous definition in line #{pi[:defined]}")
         end
-        #puts "processing pin #{pi[:name][0]}" 
         pi[:defined]=context[:line_nb]
         pi[:used]=1
-        #puts pi[:name]
       end
-    next
+      next
     end
 
     next if(context[:section]=="skip")
@@ -1045,7 +1042,6 @@ def count_used_pins(context)
   j=0
   context[:pin_info].each {|pi| i+=1 if pi[:used]>0;j+=1}
   context[:pins_used]=i
-  #puts "pins used: #{i} (#{j})"
   return i
 end
 
@@ -1081,8 +1077,7 @@ def encode_pin_info(pi)
 end
 
 def build_binary(context)
-  eeprom=[0] *  32787
-  #puts eeprom.length
+  eeprom=[0] *  ((1 << 15)-1)
   eeprom[0,4]=[0xAA, 0x55, 0x33, 0xEE] # signature
   eeprom[4,2]=['A','0'] #format revision
   eeprom[6,32]=context[:header][:name][0,32]
@@ -1105,8 +1100,8 @@ def build_binary(context)
   eeprom[240,2]=int16_2bytes_msb_first(context[:current][:sys_5v])
   eeprom[242,2]=int16_2bytes_msb_first(context[:current][:supplied])
   
-  (0..32543).each do |i|
-    break if(i>=context[:user_content].length)
+  #Error in the SRM: 32543 is too much
+  (0..(((context[:user_content].length<32524)?(context[:user_content].length):32524)-1)).each do |i|
     eeprom[244+i]=context[:user_content][i]
   end
   context[:eeprom]=eeprom
@@ -1129,9 +1124,7 @@ def parse_pin_binary(d,pi)
     if(get_mux_mode(x&0x0007,pi)<0)
       puts("*** Invalid mux mode for pin #{pi[:name][1]}")
     end
-    
   end
-  
 end
 
 def parse_binary(eeprom,context)
@@ -1164,14 +1157,8 @@ end
 
 
 def save_text_file(template,output_file_name,context)
- # if(!has_erubis)
- #   puts "Erubis not supported"
- #   return
- # end
-
   template_fd=nil
   begin
-  #  template = ERB.new(IO.readlines(template_file_name).to_s, 0, "%<>")
     template_fd = Erubis::Eruby.new(IO.readlines(template).to_s, :trim=>true)
   rescue Exception => e
     warn("Can't read template #{template}: #{e.to_s}")
@@ -1220,13 +1207,13 @@ def find_by_pin_function(function,context)
 end
 
 opts=GetoptLong.new(
-['--verbose','-v',GetoptLong::OPTIONAL_ARGUMENT],
-['--input-format',GetoptLong::REQUIRED_ARGUMENT],
-['--output-format',GetoptLong::REQUIRED_ARGUMENT],
-['--input-file','-i',GetoptLong::REQUIRED_ARGUMENT],
-['--output-file','-o',GetoptLong::REQUIRED_ARGUMENT],
-['--function','-f',GetoptLong::REQUIRED_ARGUMENT],
-['--name','-n',GetoptLong::REQUIRED_ARGUMENT]
+  ['--verbose','-v',GetoptLong::OPTIONAL_ARGUMENT],
+  ['--input-format',GetoptLong::REQUIRED_ARGUMENT],
+  ['--output-format',GetoptLong::REQUIRED_ARGUMENT],
+  ['--input-file','-i',GetoptLong::REQUIRED_ARGUMENT],
+  ['--output-file','-o',GetoptLong::REQUIRED_ARGUMENT],
+  ['--function','-f',GetoptLong::REQUIRED_ARGUMENT],
+  ['--name','-n',GetoptLong::REQUIRED_ARGUMENT]
 )
 
 verbose=0;
