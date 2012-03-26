@@ -1,3 +1,4 @@
+#!/usr/bin/ruby
 require 'rubygems'
 require "getoptlong"
 
@@ -1140,6 +1141,7 @@ def parse_binary(eeprom,context)
   context[:header][:name]=eeprom[6,32].split('')
   context[:header][:version]=eeprom[38,4].split('')
   context[:header][:manufacturer]=eeprom[42,16].split('')
+  #TODO check size
   context[:header][:part_nb]=eeprom[60,14].split('')
   context[:header][:serial_nb]=eeprom[76,12].split('')
   
@@ -1194,7 +1196,7 @@ end
 
 def find_by_pin_function(function,context)
   pins={}
-  (1..(context[:pin_info].length-1)).each do |i|
+  (0..(context[:pin_info].length-1)).each do |i|
     pi=context[:pin_info][i]
     pi[:modes].keys.each do |m|
       if(m=~/#{function}/)
