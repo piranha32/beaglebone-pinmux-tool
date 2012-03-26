@@ -1180,7 +1180,7 @@ end
 
 def find_by_pin_name(name,context)
   pins={}
-  (1..(context[:pin_info].length-1)).each do |i|
+  (0..(context[:pin_info].length-1)).each do |i|
     pi=context[:pin_info][i]
     pi[:name].each do |n|
       if(n=~/#{name}/)
@@ -1206,6 +1206,23 @@ def find_by_pin_function(function,context)
   return pins
 end
 
+def run_pinmuxing(context)
+  context[:pin_info].each do |pi|
+     if (pi[:used]>0)
+      mux=0
+      mux|=0x40 if pi[:slew_rate]>0
+      mux|=0x20 if pi[:rx]>0 || pi[:dir]==1
+      mux|=0x10 if pi[:pull]>0
+      mux|=0x08 if pi[:pen] ==0
+      mux|=pi[:mux_mode] & 0x7
+      
+      sysfs_pinmux_base="/sys/kernel/debug/omap_mux/"
+      File.open(sysfs_pinmux_base+(pi[:modes].find{|m| m[1]==0}[0]),"w"){|f| f.puts mux.to_s}
+    end
+  end 
+end
+
+
 opts=GetoptLong.new(
   ['--verbose','-v',GetoptLong::OPTIONAL_ARGUMENT],
   ['--input-format',GetoptLong::REQUIRED_ARGUMENT],
@@ -1213,16 +1230,18 @@ opts=GetoptLong.new(
   ['--input-file','-i',GetoptLong::REQUIRED_ARGUMENT],
   ['--output-file','-o',GetoptLong::REQUIRED_ARGUMENT],
   ['--function','-f',GetoptLong::REQUIRED_ARGUMENT],
-  ['--name','-n',GetoptLong::REQUIRED_ARGUMENT]
+  ['--name','-n',GetoptLong::REQUIRED_ARGUMENT],
+  ['--run','-r',GetoptLong::NO_ARGUMENT]
 )
 
 verbose=0;
 input_file_name=nil
 output_file_name=nil
 input_format="config"
-output_format="binary"
+output_format=nil
 list_name=nil
 list_function=nil
+do_muxing=false
 
 opts.each do |opt,arg|
   case opt
@@ -1240,8 +1259,13 @@ opts.each do |opt,arg|
       list_function=arg.downcase
     when '--name'
       list_name=arg.downcase
+    when '--run'
+      do_muxing=true
+      output_format="none" if output_format.nil?
   end
 end
+
+output_format="binary" if output_format.nil?
 
 current_context=Marshal.load(Marshal.dump(default_context))
 
@@ -1282,6 +1306,10 @@ case input_format
     parse_binary(eeprom,current_context)
 end
 
+if(do_muxing)
+  run_pinmuxing(current_context)
+end
+
 swd=File.dirname(__FILE__)
 aswd=File.expand_path(swd)
 
@@ -1302,7 +1330,7 @@ if(output_format=='binary')
   end
   eeprom_f.close
   exit
-else
+elsif (output_format!="none")
   if(has_erubis)
     save_text_file("#{aswd}/template/#{output_format}.tmpl",output_file_name,current_context)
   else
