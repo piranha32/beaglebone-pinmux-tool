@@ -1230,6 +1230,7 @@ opts=GetoptLong.new(
   ['--input-file','-i',GetoptLong::REQUIRED_ARGUMENT],
   ['--output-file','-o',GetoptLong::REQUIRED_ARGUMENT],
   ['--function','-f',GetoptLong::REQUIRED_ARGUMENT],
+  ['--modes','-m',GetoptLong::REQUIRED_ARGUMENT],
   ['--name','-n',GetoptLong::REQUIRED_ARGUMENT],
   ['--run','-r',GetoptLong::NO_ARGUMENT]
 )
@@ -1241,6 +1242,7 @@ input_format="config"
 output_format=nil
 list_name=nil
 list_function=nil
+list_modes=nil
 do_muxing=false
 
 opts.each do |opt,arg|
@@ -1255,17 +1257,19 @@ opts.each do |opt,arg|
       input_file_name=arg
     when '--output-file'
       output_file_name=arg
+      output_format="binary" if output_format.nil?  #output file name provided, set default format if not set already
     when '--function'
       list_function=arg.downcase
     when '--name'
       list_name=arg.downcase
+    when '--modes'
+      list_modes=arg.downcase
     when '--run'
       do_muxing=true
-      output_format="none" if output_format.nil?
   end
 end
 
-output_format="binary" if output_format.nil?
+output_format="none" if output_format.nil?
 
 current_context=Marshal.load(Marshal.dump(default_context))
 
@@ -1285,6 +1289,16 @@ if(!list_function.nil?)
     printf("%s: ",n)
     x[n].each {|pi| printf("%s(%s) ",pi[:name][0],pi[:name][1])}
     printf("\n")
+  end
+  exit
+end
+
+if(!list_modes.nil?)
+  x=find_by_pin_name(list_modes,current_context)
+  x.keys.sort.each do |n|
+    x[n].each do |pi| 
+      printf("%s(%s) : %s\n",pi[:name][0],pi[:name][1],pi[:modes].keys.sort.join(', '))
+    end
   end
   exit
 end
