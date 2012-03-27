@@ -1310,7 +1310,7 @@ if(input_file_name=~/^cape:(\d)$/)
   input_cape =$1.to_i
   if(input_cape<4)
     input_format='binary'
-    input_tile_name="/sys/bus/i2c/devices/i2c-3/3-005#{(4+input_cape).to_s}/eeprom"
+    input_file_name="/sys/bus/i2c/devices/i2c-3/3-005#{(4+input_cape).to_s}/eeprom"
   end
 end
 
