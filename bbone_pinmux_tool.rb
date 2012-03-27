@@ -1305,6 +1305,24 @@ if(!list_modes.nil?)
   exit
 end
 
+input_cape=nil
+if(input_file_name=~/^cape:(\d)$/)
+  input_cape =$1.to_i
+  if(input_cape<4)
+    input_format='binary'
+    input_tile_name="/sys/bus/i2c/devices/i2c-3/3-005#{(4+input_cape).to_s}/eeprom"
+  end
+end
+
+output_cape=nil
+if(output_file_name=~/^cape:(\d)$/)
+  output_cape =$1.to_i
+  if(output_cape<4)
+    output_format='binary'
+    output_file_name="/sys/bus/i2c/devices/i2c-3/3-005#{(4+output_cape).to_s}/eeprom"
+  end
+end
+
 eeprom=nil
 case input_format
   when 'config'
