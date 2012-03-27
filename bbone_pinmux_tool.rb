@@ -1331,7 +1331,13 @@ case input_format
     eeprom=[]
     begin
       eeprom_f=File.new(input_file_name,"rb")
-      eeprom=eeprom_f.read
+      
+      #There is no need to read the entire eeprom if no output file will be written and only run-time muxing is performed.
+      if(do_muxing && output_format=="none")
+        eeprom=eeprom_f.read(300)
+      else
+        eeprom=eeprom_f.read
+      end
       eeprom_f.close
     rescue Exception => e
       puts "Can't read input file \"#{input_file_name}\": #{e.to_s}."
